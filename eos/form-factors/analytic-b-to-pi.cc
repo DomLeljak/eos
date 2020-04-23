@@ -31,6 +31,7 @@
 #include <eos/utils/qcd.hh>
 
 #include <functional>
+#include <limits>
 
 #include <gsl/gsl_sf_gamma.h>
 
@@ -1354,12 +1355,13 @@ namespace eos
                 const double r12 = r1 * r1, r13 = r12 * r1, r14 = r12 * r12, r15 = r13 * r12, r16 = r13 * r13;
                 const double r22 = r2 * r2, r23 = r22 * r2, r24 = r22 * r22, r25 = r23 * r22, r26 = r23 * r23;
                 const double L1mr1 = std::log(1.0 - r1), Lr2 = std::log(r2), Lr2m1 = std::log(r2 - 1.0), Lmu = std::log(mb2 / (mu * mu));
+                const double L1mr1_ser = - 1. - r1 / 2. - r12 / 3. - r13 / 4.;
                 const double dilogr1 = real(dilog(complex<double>(r1, 0.0)));
                 const double dilog1mr2 = real(dilog(complex<double>(1.0 - r2, 0.0)));
 
                 const double ca00 = r2 * (-14.0 + 6.0 * r1 + (6.0 + 2.0 * r1) * r2 + pi2 * (-1.0 + r1 + (1.0 - r1) * r2));
                 const double ca0mu = r2 * (11.0 - 5.0 * r1 + (-5.0 - r1) * r2);
-                const double ca01mr1 = 2.0 * (r1 - r12 + (1.0 - 4.0 * r1 + 3.0 * r12) * r2 + (-1.0 + 3.0 * r1 - 2.0 * r12) * r22) / r1;
+                const double ca01mr1 = 2.0 * (r1 - r12 + (1.0 - 4.0 * r1 + 3.0 * r12) * r2 + (-1.0 + 3.0 * r1 - 2.0 * r12) * r22);
                 const double ca0r2m1 = 4.0 * (-1.0 + r1 + (2.0 - 2.0 * r1) * r2 + (-1.0 + 1.0 * r1) * r22);
                 const double ca0log2 = 2.0 * r2 * (1.0 - r1 + (-1.0 + r1) * r2);
                 const double ca0dlr1 = 2.0 * r2 * (1.0 - r1 + (-1.0 + r1) * r2);
@@ -1421,8 +1423,19 @@ namespace eos
                     + r25 * (-30.0 + 112.0 * r1 - 122.0 * r12 + 40.0 * r13)
                     + r26 * (2.0 - 6.0 * r1 + 4.0 * r12);
 
+                if ( std::abs(r1) < std::sqrt(std::numeric_limits<double>::epsilon()) ) {
+                    return -3.0 / (r2 * power_of<7>(r1 - r2)) * (
+                                power_of<4>(r1 - r2) * (ca00 + ca0mu * Lmu + ca01mr1 * L1mr1_ser + ca0r2m1 * Lr2m1
+                                    + ca0log2 * (L1mr1_ser * (L1mr1_ser * r1 + Lr2 - 2.0 * Lr2m1) * r1 + Lr2m1 * (Lr2m1 - 2.0 * Lr2)) + ca0dlr1 * dilogr1 + ca0dl1mr2 * dilog1mr2)
+                                - 3.0 * power_of<2>(r1 - r2) * (ca20 + ca2mu * Lmu + ca21mr1 * L1mr1_ser + ca2r2m1 * Lr2m1
+                                    + ca2l2 * (2.0 * power_of<2>(L1mr1_ser * r1 - Lr2m1) - 4.0 * Lr2m1 * Lr2 + 2.0 * L1mr1_ser * Lr2 * r1 + 2.0 * dilogr1 - 6.0 * dilog1mr2)) * a2pi
+                                - 15.0 * (ca40 + ca4mu * Lmu + ca4r2m1 * Lr2m1 + ca41mr1 * L1mr1_ser
+                                    + ca4l2 * (2.0 * power_of<2>(L1mr1_ser * r1 - Lr2m1) - 4.0 * Lr2m1 * Lr2 + 2.0 * L1mr1_ser * Lr2 * r1 + 2.0 * dilogr1 - 6.0 * dilog1mr2)) * a4pi
+                            );
+                }
+
                 return -3.0 / (r2 * power_of<7>(r1 - r2)) * (
-                            power_of<4>(r1 - r2) * (ca00 + ca0mu * Lmu + ca01mr1 * L1mr1 + ca0r2m1 * Lr2m1 
+                            power_of<4>(r1 - r2) * (ca00 + ca0mu * Lmu + ca01mr1 * L1mr1 / r1 + ca0r2m1 * Lr2m1
                                 + ca0log2 * (L1mr1 * (L1mr1 + Lr2 - 2.0 * Lr2m1) + Lr2m1 * (Lr2m1 - 2.0 * Lr2)) + ca0dlr1 * dilogr1 + ca0dl1mr2 * dilog1mr2)
                             - 3.0 * power_of<2>(r1 - r2) * (ca20 + ca2mu * Lmu + ca21mr1 * L1mr1 / r1 + ca2r2m1 * Lr2m1
                                 + ca2l2 * (2.0 * power_of<2>(L1mr1 - Lr2m1) - 4.0 * Lr2m1 * Lr2 + 2.0 * L1mr1 * Lr2 + 2.0 * dilogr1 - 6.0 * dilog1mr2)) * a2pi
@@ -1464,27 +1477,42 @@ namespace eos
             {
                 const double lr2 = std::log(r2), lr2m1 = std::log(r2 - 1.0);
                 const double l = std::log((r2 - r1)/(r2 - 1.0));
-
                 return l * (-1.0 + 6.0 * lr2m1 - 3.0 * lr2 + 3.0 * lmu);
             };
             auto T1Ttw3pthetarhom1 = [&] (const double & r1, const double & r2) -> double
             {
+                const double r12 = r1 * r1, r13 = r12 * r1, r14 = r13 * r1;
+                const double r22 = r2 * r2, r23 = r22 * r2, r24 = r23 * r2;
                 const double lr2 = std::log(r2), lr2m1 = std::log(r2 - 1.0);
                 const double lr1 = std::log(r1), l1mr1 = std::log(1.0 - r1);
                 const double lr2mr1 = std::log(r2 - r1), l = std::log((r1 - r2)/(r1 - 1.0));
-                const double dl = - 3.0 * (std::real(dilog(1.0 / r1)) + std::real(dilog(r2)) - std::real(dilog(r2 / r1)) + 2.0 * std::real(dilog((r2 - 1.0)/(r1 - 1.0))));
+                const double dl = - 3.0 * (std::real(dilog(1.0 / r1)) + std::real(dilog(r2)) - std::real(dilog(r2 / r1)) + 2.0 * std::real(dilog((r2 - 1.0)/(r1 - 1.0))) + lr2 * (lr1 + lr2m1 - lr2mr1 - lr2 / 2.0));
+                const double dl_ser = - 6.0 * std::real(dilog(1.0 - r2)) + 3.0 * std::real(dilog(1.0 / r2)) - pi2 + 3.0 * lr2 * (3.0 * lr2 / 2.0 - lr2m1)
+                    + 3.0 * r1 * (r2 + (2.0 * r2 - 1.0) * lr2 - 1.0) / r2
+                    + 3.0 * r12 * ((4.0 * r22 - 2.0) * lr2 + (r2 - 1.0) * (5.0 * r2 + 1.0)) / (4.0 * r22)
+                    + r13 * ((6.0 * r23 - 3.0) * lr2 + (r2 - 1.0) * (2.0 * r2 * (5.0 * r2 + 2.0) + 1.0)) / (3.0 * r23)
+                    + r14 * (12.0 * (2.0 * r24 - 1.0) * lr2 + (r2 - 1.0) * (r2 * (r2 * (47.0 * r2 + 23.0) + 11.0) + 3.0)) / (16.0 * r24);
 
-                return 3.0 * pi2 / 2.0 + lr2 * (- 2.0 - 3.0 * lr1 - 3.0 * lr2m1 + 3.0 * lr2mr1 + 3.0 * lr2 / 2.0) + 3.0 * lmu * (l1mr1 - lr2mr1) + l * (1.0 - 6.0 * lr2m1) + dl;
+                if ( std::abs(r1) < std::sqrt(std::numeric_limits<double>::epsilon()) )
+                    return 3.0 * pi2 / 2.0 - 2.0 * lr2 + 3.0 * lmu * (l1mr1 - lr2mr1) + l * (1.0 - 6.0 * lr2m1) + dl_ser;
+                return 3.0 * pi2 / 2.0 - 2.0 * lr2 + 3.0 * lmu * (l1mr1 - lr2mr1) + l * (1.0 - 6.0 * lr2m1) + dl;
             };
 
             auto T1Ttw3pdeltarhom1 = [&] (const double & r1, const double & r2) -> double
             {
+                const double r12 = r1 * r1, r13 = r12 * r1;
                 const double lr2 = std::log(r2);
                 const double lr2m1 = std::log(r2 - 1.0);
                 const double l1mr1 = std::log(1.0 - r1);
+                const double l1mr1_ser = - 1.0 - r1 / 2.0 - r12 / 3.0 - r13 / 4.0;
                 const double l = std::log((r2 - 1.0)/(1.0 - r1));
                 const double dl = - std::real(dilog(r1)) - std::real(dilog(1.0 - r2));
                 
+                if ( std::abs(r1) < std::sqrt(std::numeric_limits<double>::epsilon()) )
+                {
+                    return (-5.0 * pi2 / 6.0 + (-1.0 + (4.0 + 1.0 / r2) * r1 - l1mr1_ser * r12) * l1mr1_ser + (-2.0 - 2.0 / r2 - 2.0 * l1mr1_ser * r1 + 3.0 * lr2m1) * lr2m1
+                            + (l1mr1_ser * r1 - 2.0 * lr2m1) * lr2 + 2.0 * l * lmu + dl);
+                }
                 return (-5.0 * pi2 / 6.0 + (4.0 - 1.0 / r1 + 1.0 / r2 - l1mr1) * l1mr1 + (-2.0 - 2.0 / r2 - 2.0 * l1mr1 + 3.0 * lr2m1) * lr2m1
                         + (l1mr1 - 2.0 * lr2m1) * lr2 + 2.0 * l * lmu + dl);
             };
@@ -1500,31 +1528,50 @@ namespace eos
             };
             auto T1Ttw3sigmathetarhom1 = [&] (const double & r1, const double & r2) -> double
             {
+                const double r12 = r1 * r1, r13 = r12 * r1, r14 = r13 * r1;
+                const double r22 = r2 * r2, r23 = r22 * r2;
                 const double lr2 = std::log(r2), lr2m1 = std::log(r2 - 1.0);
                 const double lr1 = std::log(r1), l1mr1 = std::log(1.0 - r1);
                 const double lr2mr1 = std::log(r2 - r1);
-                const double dl = 6.0 * (std::real(dilog(1.0 / r1)) + std::real(dilog(r2)) - std::real(dilog(r2 / r1)) + 2.0 * std::real(dilog((r2 - 1.0)/(r1 - 1.0))));
+                const double dl = r2 * (r1 - r2) * 3.0 * (std::real(dilog(1.0 / r1)) + std::real(dilog(r2)) - std::real(dilog(r2 / r1)) + 2.0 * std::real(dilog((r2 - 1.0)/(r1 - 1.0))) + lr2 * lr1);
+                const double dl_ser = - r22 * (6.0 * std::real(dilog(1.0 - r2)) - 3.0 * std::real(dilog(1.0 / r2)) + pi2)
+                    + r1 * r2 * (6.0 * std::real(dilog(1.0 - r2)) - 3.0 * std::real(dilog(1.0 / r2)) + 3.0 * r2 + 6.0 * r2 * lr2 + pi2 - 3.0)
+                    + r12 * 3.0 * (3.0 - 8.0 * r2 + 5.0 * r2 + 4.0 * (r2 - 2.0) * r2 * lr2) / 4.0
+                    + r13 * (5.0 / (4.0 * r2) + 6.0 - 69.0 * r2 / 4.0 + 10.0 * r22 + 3.0 * (2.0 * r2 - 3.0) * r2 * lr2) / 3.0
+                    + r14 * ((r2 - 1.0) * (r2 * (r2 * (141.0 * r2 - 91.0) - 31.0) - 7.0) + 24.0 * (3.0 * r2 - 4.0) * r23 * lr2) / (48.0 * r22);
 
-                return - 3.0 * (4.0 - 9.0 * r2 + 5.0 * r2 * r2 
-                    - lr2 * r2 * (-1.0 + r1 - 3.0 * r1 * lr1 + 3.0 * r2 * lr1) - 2.0 * lr2m1 * r2 * (r2 - 1.0) - (r2 - 1.0) * r2 * lmu 
+                if ( std::abs(r1) < std::sqrt(std::numeric_limits<double>::epsilon()) )
+                {
+                    return - 3.0 * (4.0 - 9.0 * r2 + 5.0 * r22
+                        - lr2 * r2 * (r1 - 1.0) - 2.0 * lr2m1 * r2 * (r2 - 1.0) - (r2 - 1.0) * r2 * lmu
+                        - r2 * (r1 - r2) * (6.0 * lr2 * (lr2mr1 - lr2m1 + lr2 / 2.0) + 12.0 * lr2m1 * (l1mr1 - lr2mr1)
+                        + 2.0 * lr2mr1 * (1.0 - 3.0 * lmu) + 2.0 * l1mr1 * (-1.0 + 3.0 * lmu) + 3.0 * pi2) / 2.0
+                        + dl_ser);
+                }
+                return - 3.0 * (4.0 - 9.0 * r2 + 5.0 * r22
+                    - lr2 * r2 * (r1 - 1.0) - 2.0 * lr2m1 * r2 * (r2 - 1.0) - (r2 - 1.0) * r2 * lmu
                     - r2 * (r1 - r2) * (6.0 * lr2 * (lr2mr1 - lr2m1 + lr2 / 2.0) + 12.0 * lr2m1 * (l1mr1 - lr2mr1) 
-                    + 2.0 * lr2mr1 * (1.0 - 3.0 * lmu) + 2.0 * l1mr1 * (-1.0 + 3.0 * lmu) - dl + 3.0 * pi2) / 2.0);
+                    + 2.0 * lr2mr1 * (1.0 - 3.0 * lmu) + 2.0 * l1mr1 * (-1.0 + 3.0 * lmu) + 3.0 * pi2) / 2.0
+                    + dl);
             };
             auto T1Ttw3sigmadeltarhom1 = [&] (const double & r1, const double & r2) -> double
             {
-                const double r12 = r1 * r1, r22 = r2 * r2;
+                const double r12 = r1 * r1, r13 = r12 * r1, r22 = r2 * r2;
                 const double l1mr1 = std::log(1.0 - r1);
                 const double lr2 = std::log(r2), lr2m1 = std::log(r2 - 1.0);
                 const double l = std::log((r2 - 1.0)/(1.0 - r1));
                 
                 const double l0 = r2 * (26.0 - 5.0 * r1 - 5.0 * r2 - (-12.0 + 11.0 * r1 + r2) * pi2 / 6.0);
                 const double l1 = - (4.0 * r1 - 3.0 * r12 + (-6.0 * r1 + 2.0 * r12) * r2 + (1.0 + 2.0 * r1) * r22) * l1mr1 / r1;
+                const double l1_ser = - (4.0 * r1 - 3.0 * r12 + (-6.0 * r1 + 2.0 * r12) * r2 + (1.0 + 2.0 * r1) * r22) * (-1.0 - r1 / 2.0 - r12 / 3.0 - r13 / 4.0);
                 const double l2 = 2.0 * (4.0 - 3.0 * r1 + (-3.0 + r1) * r2 + r22) * lr2m1;
                 const double l3 = r2 * (-14.0 + r1 + r2) * lmu;
                 const double dl1 = r2 * ((-4.0 + r1 + 3.0 * r2) * l1mr1 * l1mr1 + (-4.0 + 5.0 * r1 - r2) * lr2m1 * lr2m1 + (-4.0 + 3.0 * r1 + r2) * l1mr1 * lr2
                         - 2.0 * (-4.0 + 3.0 * r1 + r2) * (l1mr1 + lr2) * lr2m1 + 2.0 * (r1 - r2) * l * lmu);
                 const double dl2 = r2 * ((-4.0 + r1 + 3.0 * r2) * std::real(dilog(r1)) + (12.0 - 7.0 * r1 - 5.0 * r2) * std::real(dilog(1.0 - r2)));
 
+                if ( std::abs(r1) < std::sqrt(std::numeric_limits<double>::epsilon()) )
+                    return 3.0 * (l0 + l1_ser + l2 + l3 + dl1 + dl2);
                 return 3.0 * (l0 + l1 + l2 + l3 + dl1 + dl2);
             };
             std::function<double (const double &)> integrand(
@@ -1702,10 +1749,14 @@ namespace eos
             std::function<double (const double &)> F(
                 [&] (const double & _M2) -> double
                 {
+                    const double MB2 = MB * MB, mpi2 = mpi * mpi;
+
+                    const double F_lo = F_lo_tw2(q2, _M2) + F_lo_tw3(q2, _M2) + F_lo_tw4(q2, _M2);
+                    const double F_nlo = F_nlo_tw2(q2, _M2) + F_nlo_tw3(q2, _M2);
                     const double Ftil_lo  = Ftil_lo_tw3(q2, _M2) + Ftil_lo_tw4(q2, _M2);
                     const double Ftil_nlo = Ftil_nlo_tw2(q2, _M2) + Ftil_lo_tw3(q2, _M2);
 
-                    return Ftil_lo + alpha_s / (3.0 * M_PI) * Ftil_nlo;
+                    return 2.0 * q2 / (MB2 - mpi2) * (Ftil_lo + alpha_s / (3.0 * M_PI) * Ftil_nlo) + (1.0 - q2 / (MB2 - mpi)) * (F_lo + alpha_s / (3.0 * M_PI) * F_nlo);
                 }
             );
 
