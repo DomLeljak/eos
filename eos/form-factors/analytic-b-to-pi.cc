@@ -1753,6 +1753,10 @@ namespace eos
 
                     const double F_lo = F_lo_tw2(q2, _M2) + F_lo_tw3(q2, _M2) + F_lo_tw4(q2, _M2);
                     const double F_nlo = F_nlo_tw2(q2, _M2) + F_nlo_tw3(q2, _M2);
+
+                    if ( (q2 / (MB2 - mpi2)) < std::sqrt(std::numeric_limits<double>::epsilon()) )
+                        return F_lo + alpha_s / (3.0 * M_PI) * F_nlo;
+
                     const double Ftil_lo  = Ftil_lo_tw3(q2, _M2) + Ftil_lo_tw4(q2, _M2);
                     const double Ftil_nlo = Ftil_nlo_tw2(q2, _M2) + Ftil_lo_tw3(q2, _M2);
 
@@ -1773,14 +1777,15 @@ namespace eos
         {
             const double M2_rescaled = this->M2() * this->rescale_factor_T(q2);
             const double alpha_s = model->alpha_s(mu);
+            const double mb = this->m_b_msbar(mu);
 
             std::function<double (const double &)> F(
                 [&] (const double & _M2) -> double
                 {
                     const double FT_lo  = FT_lo_tw2(q2, _M2) + FT_lo_tw3(q2, _M2) + FT_lo_tw4(q2, _M2);
-                    const double FT_nlo = FT_nlo_tw2(q2, _M2) + FT_lo_tw3(q2, _M2);
+                    const double FT_nlo = FT_nlo_tw2(q2, _M2) + FT_nlo_tw3(q2, _M2);
 
-                    return FT_lo + alpha_s / (3.0 * M_PI) * FT_nlo;
+                    return FT_lo + alpha_s / (3.0 * M_PI * mb) * FT_nlo;
                 }
             );
 
