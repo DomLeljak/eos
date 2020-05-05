@@ -54,9 +54,9 @@ namespace eos
         std::function<double (const double &)> rescale_factor_T;
         UsedParameter M2;
         UsedParameter Mprime2;
-        UsedParameter s0B;
-        UsedParameter s0tilB;
-        UsedParameter s0TB;
+        UsedParameter _s0_plus, _s0_plus_p;
+        UsedParameter           _s0_zero_p;
+        UsedParameter _s0_T,    _s0_T_p;
         UsedParameter sprime0B;
         UsedParameter mu;
 
@@ -64,11 +64,13 @@ namespace eos
         UsedParameter zeta_nnlo;
 
         // QCD parameters
-        UsedParameter m0;
+        UsedParameter m02;
         UsedParameter cond_GG;
         UsedParameter r_vac;
 
         PionLCDAs pi;
+
+        GSL::QAGS::Config config;
 
         Implementation(const Parameters & p, const Options & o, ParameterUser & u) :
             model(Model::make("SM", p, o)),
@@ -78,17 +80,20 @@ namespace eos
             opt_rescale_borel(o, "rescale-borel", { "1", "0" }, "1"),
             M2(p["B->pi::M^2@DKMMO2008"], u),
             Mprime2(p["B->pi::Mp^2@DKMMO2008"], u),
-            s0B(p["B->pi::s_0^B@DKMMO2008"], u),
-            s0tilB(p["B->pi::stil_0^B@DKMMO2008"], u),
-            s0TB(p["B->pi::sT_0^B@DKMMO2008"], u),
+            _s0_plus(p["B->pi::s_0^+(0)@DKMMO2008"], u),
+            _s0_plus_p(p["B->pi::s_0^+'(0)@DKMMO2008"], u),
+            _s0_zero_p(p["B->pi::s_0^0'(0)@DKMMO2008"], u),
+            _s0_T(p["B->pi::s_0^T(0)@DKMMO2008"], u),
+            _s0_T_p(p["B->pi::s_0^T'(0)@DKMMO2008"], u),
             sprime0B(p["B->pi::sp_0^B@DKMMO2008"], u),
             mu(p["B->pi::mu@DKMMO2008"], u),
             zeta_nnlo(p["B->pi::zeta(NNLO)@DKMMO2008"], u),
-            m0(p["QCD::m_0"], u),
+            m02(p["QCD::m_0^2"], u),
             cond_GG(p["QCD::cond_GG"], u),
             r_vac(p["QCD::r_vac"], u),
-            pi(p, o)
-        {            
+            pi(p, o),
+            config(GSL::QAGS::Config().epsrel(1e-4))
+        {
             using namespace std::placeholders;
 
             if ('1' == opt_rescale_borel.value()[0])
@@ -105,11 +110,28 @@ namespace eos
                 rescale_factor_T = std::bind(&Implementation::_no_rescale_factor, this, _1);
 
             }
+
+            u.uses(*model);
         }
 
         inline double m_b_msbar(const double & mu) const
         {
             return model->m_b_msbar(mu);
+        }
+
+        inline double s0B(const double & q2) const
+        {
+            return _s0_plus() + _s0_plus_p() * q2;
+        }
+
+        inline double s0tilB(const double & q2) const
+        {
+            return _s0_plus() + _s0_zero_p() * q2;
+        }
+
+        inline double s0TB(const double & q2) const
+        {
+            return _s0_T() + _s0_T_p() * q2;
         }
 
         static double rho_1(const double & s, const double & mb, const double & mu)
@@ -143,7 +165,6 @@ namespace eos
             const double MB2 = MB * MB, MB4 = MB2 * MB2;
             const double mb = this->m_b_msbar(mu), mb2 = mb * mb, mb4 = mb2 * mb2;
             const double Mprime4 = Mprime2 * Mprime2;
-            const double m02 = m0 * m0;
 
             const double cond_qq_mu = -fpi * fpi * this->pi.mupi(mu) / 2.0; // <qq>@mu
             const double cond_qq_1 = -fpi * fpi * this->pi.mupi(1.0) / 2.0; // <qq>@1GeV
@@ -188,7 +209,6 @@ namespace eos
 
             const double mb = this->m_b_msbar(mu), mb2 = mb * mb, mb4 = mb2 * mb2;
             const double Mprime4 = Mprime2 * Mprime2;
-            const double m02 = m0 * m0;
 
             const double cond_qq_mu = -fpi * fpi * this->pi.mupi(mu) / 2.0; // <qq>@mu
             const double cond_qq_1 = -fpi * fpi * this->pi.mupi(1.0) / 2.0; // <qq>@1GeV
@@ -246,7 +266,7 @@ namespace eos
         double F_lo_tw2(const double & q2, const double & _M2) const
         {
             const double mb = this->m_b_msbar(mu), mb2 = mb * mb;
-            const double u0 = std::max(1e-10, (mb2 - q2) / (s0B - q2));
+            const double u0 = std::max(1e-10, (mb2 - q2) / (s0B(q2) - q2));
 
             std::function<double (const double &)> integrand(std::bind(&Implementation<AnalyticFormFactorBToPiDKMMO2008>::F_lo_tw2_integrand, this, std::placeholders::_1, q2, _M2));
 
@@ -304,7 +324,7 @@ namespace eos
         double F_lo_tw3(const double & q2, const double & _M2) const
         {
             const double mb = this->m_b_msbar(mu), mb2 = mb * mb;
-            const double u0 = std::max(1e-10, (mb2 - q2) / (s0B - q2));
+            const double u0 = std::max(1e-10, (mb2 - q2) / (s0B(q2) - q2));
 
             std::function<double (const double &)> integrand(std::bind(&Implementation<AnalyticFormFactorBToPiDKMMO2008>::F_lo_tw3_integrand, this, std::placeholders::_1, q2, _M2));
 
@@ -314,7 +334,7 @@ namespace eos
         double F_lo_tw4(const double & q2, const double & _M2) const
         {
             const double mb = this->m_b_msbar(mu), mb2 = mb * mb, mpi2 = mpi * mpi, mpi4 = mpi2 * mpi2;
-            const double u0 = std::max(1e-10, (mb2 - q2) / (s0B - q2));
+            const double u0 = std::max(1e-10, (mb2 - q2) / (s0B(q2) - q2));
             const double a2pi = pi.a2pi(mu);
             const double deltapipi = pi.deltapipi(mu);
             const double omega4pi = pi.omega4pi(mu);
@@ -596,9 +616,7 @@ namespace eos
 
             static const double eps = 1e-12;
 
-            auto config = GSL::QAGS::Config().epsrel(1e-6);
-
-            return mb2 * fpi * integrate<GSL::QAGS>(integrand, 1.0 + eps, s0B / mb2, config);
+            return mb2 * fpi * integrate<GSL::QAGS>(integrand, 1.0 + eps, s0B(q2) / mb2, config);
         }
 
         double F_nlo_tw3(const double & q2, const double _M2) const
@@ -780,7 +798,7 @@ namespace eos
             auto config = GSL::QAGS::Config().epsrel(1e-6);
 
             return fpi * mupi * mb * (
-                    integrate<GSL::QAGS>(integrand, 1.0 + eps, s0B / mb2, config)
+                    integrate<GSL::QAGS>(integrand, 1.0 + eps, s0B(q2) / mb2, config)
                     - (
                         2.0 / (1.0 - r1) * (4.0 - 3.0 * lmu)
                         + 2.0 * (1.0 + r1) / power_of<2>(1.0 - r1) * (4.0 - 3.0 * lmu)
@@ -823,7 +841,7 @@ namespace eos
         double Ftil_lo_tw3(const double & q2, const double & _M2) const
         {
             const double mb = this->m_b_msbar(mu), mb2 = mb * mb;
-            const double u0 = std::max(1e-10, (mb2 - q2) / (s0tilB - q2));
+            const double u0 = std::max(1e-10, (mb2 - q2) / (s0tilB(q2) - q2));
 
             std::function<double (const double &)> integrand(std::bind(&Implementation<AnalyticFormFactorBToPiDKMMO2008>::Ftil_lo_tw3_integrand, this, std::placeholders::_1, q2, _M2));
 
@@ -833,7 +851,7 @@ namespace eos
         double Ftil_lo_tw4(const double & q2, const double & _M2) const
         {
             const double mb = this->m_b_msbar(mu), mb2 = mb * mb, mpi2 = mpi * mpi, mpi4 = mpi2 * mpi2;
-            const double u0 = std::max(1e-10, (mb2 - q2) / (s0tilB - q2));
+            const double u0 = std::max(1e-10, (mb2 - q2) / (s0tilB(q2) - q2));
             const double a2pi = pi.a2pi(mu);
             const double deltapipi = pi.deltapipi(mu);
             const double omega4pi = pi.omega4pi(mu);
@@ -1033,9 +1051,7 @@ namespace eos
 
             static const double eps = 1e-12;
 
-            auto config = GSL::QAGS::Config().epsrel(1e-8);
-
-            return mb2 * fpi * integrate<GSL::QAGS>(integrand, 1.0 + eps, s0tilB / mb2, config);
+            return mb2 * fpi * integrate<GSL::QAGS>(integrand, 1.0 + eps, s0tilB(q2) / mb2, config);
         }
 
         double Ftil_nlo_tw3(const double & q2, const double _M2) const
@@ -1139,9 +1155,7 @@ namespace eos
 
             static const double eps = 1e-12;
 
-            auto config = GSL::QAGS::Config().epsrel(1e-6);
-
-            return fpi * mupi * mb * integrate<GSL::QAGS>(integrand, 1.0 + eps, s0tilB / mb2, config);
+            return fpi * mupi * mb * integrate<GSL::QAGS>(integrand, 1.0 + eps, s0tilB(q2) / mb2, config);
         }
 
         double FT_lo_tw2_integrand(const double & u, const double & q2, const double _M2) const
@@ -1154,7 +1168,7 @@ namespace eos
         double FT_lo_tw2(const double & q2, const double & _M2) const
         {
             const double mb = this->m_b_msbar(mu), mb2 = mb * mb;
-            const double u0 = std::max(1e-10, (mb2 - q2) / (s0TB - q2));
+            const double u0 = std::max(1e-10, (mb2 - q2) / (s0TB(q2) - q2));
 
             std::function<double (const double &)> integrand(std::bind(&Implementation<AnalyticFormFactorBToPiDKMMO2008>::FT_lo_tw2_integrand, this, std::placeholders::_1, q2, _M2));
 
@@ -1174,17 +1188,17 @@ namespace eos
         double FT_lo_tw3(const double & q2, const double & _M2) const
         {
             const double mb = this->m_b_msbar(mu), mb2 = mb * mb;
-            const double u0 = std::max(1e-10, (mb2 - q2) / (s0TB - q2));
+            const double u0 = std::max(1e-10, (mb2 - q2) / (s0TB(q2) - q2));
 
             std::function<double (const double &)> integrand(std::bind(&Implementation<AnalyticFormFactorBToPiDKMMO2008>::FT_lo_tw3_integrand, this, std::placeholders::_1, q2, _M2));
 
             return mb * fpi * integrate<GSL::QNG>(integrand, u0, 1.000);
         }
-        
+
         double FT_lo_tw4(const double & q2, const double & _M2) const
         {
             const double mb = this->m_b_msbar(mu), mb2 = mb * mb, mpi2 = mpi * mpi, mpi4 = mpi2 * mpi2;
-            const double u0 = std::max(1e-10, (mb2 - q2) / (s0TB - q2));
+            const double u0 = std::max(1e-10, (mb2 - q2) / (s0TB(q2) - q2));
             const double a2pi = pi.a2pi(mu);
             const double deltapipi = pi.deltapipi(mu);
             const double omega4pi = pi.omega4pi(mu);
@@ -1453,9 +1467,7 @@ namespace eos
 
             static const double eps = 1e-12;
 
-            auto config = GSL::QAGS::Config().epsrel(1e-6);
-
-            return mb2 * fpi * integrate<GSL::QAGS>(integrand, 1.0 + eps, s0TB / mb2, config);
+            return mb * fpi * integrate<GSL::QAGS>(integrand, 1.0 + eps, s0TB(q2) / mb2, config);
         }
 
         double FT_nlo_tw3(const double & q2, const double _M2) const
@@ -1586,9 +1598,7 @@ namespace eos
 
             static const double eps = 1e-12;
 
-            auto config = GSL::QAGS::Config().epsrel(1e-6);
-
-            return fpi * mupi * mb * (integrate<GSL::QAGS>(integrand, 1.0 + eps, s0TB / mb2, config)
+            return fpi * mupi * (integrate<GSL::QAGS>(integrand, 1.0 + eps, s0TB(q2) / mb2, config)
                     - 4.0 * (4.0 - 3.0 * lmu) * std::exp(-mb2 / _M2) / power_of<2>(1.0 - q2 / mb2)
                     );
         }
@@ -1602,8 +1612,8 @@ namespace eos
         double _rescale_factor_p(const double & q2) const
         {
             const double mb = this->m_b_msbar(mu), mb2 = mb * mb;
-            const double u0_q2 = std::max(1e-10, (mb2 - q2) / (s0B - q2));
-            const double u0_zero = std::max(1e-10, mb2 / s0B);
+            const double u0_q2 = std::max(1e-10, (mb2 - q2) / (s0B(q2) - q2));
+            const double u0_zero = std::max(1e-10, mb2 / s0B(q2));
 
             std::function<double (const double &)> integrand_numerator_q2(
                 [&] (const double & u) -> double
@@ -1639,8 +1649,8 @@ namespace eos
         {
             const double MB2 = MB * MB, mpi2 = mpi * mpi;
             const double mb = this->m_b_msbar(mu), mb2 = mb * mb;
-            const double u0_q2 = std::max(1e-10, (mb2 - q2) / (s0tilB - q2));
-            const double u0_zero = std::max(1e-10, mb2 / s0tilB);
+            const double u0_q2 = std::max(1e-10, (mb2 - q2) / (s0tilB(q2) - q2));
+            const double u0_zero = std::max(1e-10, mb2 / s0tilB(q2));
 
             std::function<double (const double &)> integrand_numerator_q2(
                 [&] (const double & u) -> double
@@ -1682,8 +1692,8 @@ namespace eos
         double _rescale_factor_T(const double & q2) const
         {
             const double mb = this->m_b_msbar(mu), mb2 = mb * mb;
-            const double u0_q2 = std::max(1e-10, (mb2 - q2) / (s0TB - q2));
-            const double u0_zero = std::max(1e-10, mb2 / s0TB);
+            const double u0_q2 = std::max(1e-10, (mb2 - q2) / (s0TB(q2) - q2));
+            const double u0_zero = std::max(1e-10, mb2 / s0TB(q2));
 
             std::function<double (const double &)> integrand_numerator_q2(
                 [&] (const double & u) -> double
@@ -1836,7 +1846,6 @@ namespace eos
 
         double f_t(const double & q2) const
         {
-            const double mb = this->m_b_msbar(mu);
             const double MB2 = MB * MB;
             const double M2_rescaled = this->M2() * this->rescale_factor_T(q2);
             const double fB = decay_constant();
@@ -1845,7 +1854,7 @@ namespace eos
             //const double FT_nnlo = FT_nlo * FT_nlo / FT_lo * zeta_nnlo;
             const double alpha_s = model->alpha_s(mu);
 
-            return std::exp(MB2 / M2_rescaled) / (2.0 * MB2 * fB) * (MB + mpi) * (FT_lo + alpha_s / (3.0 * M_PI * mb) * FT_nlo);
+            return std::exp(MB2 / M2_rescaled) / (2.0 * MB2 * fB) * (MB + mpi) * (FT_lo + alpha_s / (3.0 * M_PI) * FT_nlo);
         }
 
         Diagnostics diagnostics() const
