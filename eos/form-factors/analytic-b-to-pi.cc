@@ -1484,7 +1484,7 @@ namespace eos
                 const double r12 = r1 * r1, r13 = r12 * r1, r14 = r13 * r1;
                 const double r22 = r2 * r2, r23 = r22 * r2, r24 = r23 * r2;
                 const double lr2 = std::log(r2), lr2m1 = std::log(r2 - 1.0);
-                const double lr1 = std::log(r1), l1mr1 = std::log(1.0 - r1);
+                const double lr1 = std::log(std::abs(r1)), l1mr1 = std::log(1.0 - r1);
                 const double lr2mr1 = std::log(r2 - r1), l = std::log((r1 - r2)/(r1 - 1.0));
                 const double dl = - 3.0 * (std::real(dilog(1.0 / r1)) + std::real(dilog(r2)) - std::real(dilog(r2 / r1)) + 2.0 * std::real(dilog((r2 - 1.0)/(r1 - 1.0))) + lr2 * (lr1 + lr2m1 - lr2mr1 - lr2 / 2.0));
                 const double dl_ser = - 6.0 * std::real(dilog(1.0 - r2)) + 3.0 * std::real(dilog(1.0 / r2)) - pi2 + 3.0 * lr2 * (3.0 * lr2 / 2.0 - lr2m1)
@@ -1531,7 +1531,7 @@ namespace eos
                 const double r12 = r1 * r1, r13 = r12 * r1, r14 = r13 * r1;
                 const double r22 = r2 * r2, r23 = r22 * r2;
                 const double lr2 = std::log(r2), lr2m1 = std::log(r2 - 1.0);
-                const double lr1 = std::log(r1), l1mr1 = std::log(1.0 - r1);
+                const double lr1 = std::log(std::abs(r1)), l1mr1 = std::log(1.0 - r1);
                 const double lr2mr1 = std::log(r2 - r1);
                 const double dl = r2 * (r1 - r2) * 3.0 * (std::real(dilog(1.0 / r1)) + std::real(dilog(r2)) - std::real(dilog(r2 / r1)) + 2.0 * std::real(dilog((r2 - 1.0)/(r1 - 1.0))) + lr2 * lr1);
                 const double dl_ser = - r22 * (6.0 * std::real(dilog(1.0 - r2)) - 3.0 * std::real(dilog(1.0 / r2)) + pi2)
