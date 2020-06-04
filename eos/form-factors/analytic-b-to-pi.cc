@@ -1061,7 +1061,7 @@ namespace eos
             };
             auto T1tiltw3pthetarhom1 = [&] (const double & r1, const double & r2) -> double
             {
-                const double logr1 = std::log(r1);
+                const double logr1 = std::log(std::abs(r1));
                 const double logr2 = std::log(r2);
                 const double log1mr1 = std::log(1.0 - r1);
                 const double logr2m1 = std::log(r2 - 1.0);
@@ -1098,7 +1098,7 @@ namespace eos
             auto T1tiltw3sigmathetarhom1 = [&] (const double & r1, const double & r2) -> double
             {
                 const double r12 = r1 * r1, r22 = r2 * r2;
-                const double lr1 = std::log(r1), l1mr1 = std::log(1.0 - r1);
+                const double lr1 = std::log(std::abs(r1)), l1mr1 = std::log(1.0 - r1);
                 const double lr2 = std::log(r2), lr2m1 = std::log(r2 - 1.0);
                 const double lr2mr1 = std::log(r2 - r1);
                 const double dil = -2.0 * (2.0 * std::real(dilog(1/r1)) + 4.0 * std::real(dilog((r2 - 1.0)/(r1 - 1.0))) + std::real(dilog(1/r2)) + 2.0 * std::real(dilog(r2)) - 2.0 * std::real(dilog(r2 / r1)) + 4.0 * std::log((r1 - r2)/(r1 - 1)) * std::log(r2 - 1.0)) * (r2 - r1) * r2;
