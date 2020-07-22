@@ -289,6 +289,9 @@ namespace eos
     // [BCL2008]
     template class BCL2008FormFactors<BToPi>;
 
+    // [BCL2008], Expansion up to 4th order in z(q2)
+    template class BCL2008_4_FormFactors<BToPi>;
+
     /* B_{u,d -> D */
 
     // [BCL2008]
@@ -339,6 +342,7 @@ namespace eos
             { KeyType("B->K::BSZ2015"),       &BSZ2015FormFactors<BToK, PToP>::make            },
             // b -> u
             { KeyType("B->pi::BCL2008"),      &BCL2008FormFactors<BToPi>::make                 },
+            { KeyType("B->pi::BCL2008-4"),    &BCL2008_4_FormFactors<BToPi>::make              },
             { KeyType("B->pi::BSZ2015"),      &BSZ2015FormFactors<BToPi, PToP>::make           },
             { KeyType("B_s->K::BSZ2015"),     &BSZ2015FormFactors<BsToK, PToP>::make           },
             // b -> c
