@@ -8,7 +8,7 @@ groups:
     description: ''
     parameters:
       # form factor parameters for B->pi in [BCL2008] parametrization, with
-      # f_+ taken from [IKMvD2014]
+      # f_+ taken from [IKMvD2014], with K = 3
       'B->pi::f_+(0)@BCL2008' :
           central: +0.307
           min:     +0.287
@@ -56,6 +56,73 @@ groups:
           min:     +0.00
           max:     +0.00
           latex:    '$b_{T, 2}^{B\to \pi}$'
+          comments: ''
+      # form factor parameters for B->pi in [BCL2008] parametrization, with K = 4
+      'B->pi::f_+(0)@BCL2008-4' :
+          central: +0.00
+          min:     +0.00
+          max:     +0.00
+          latex:    '$f^{B\to \pi}_+(0)$'
+          comments: ''
+      'B->pi::b_+^1@BCL2008-4' :
+          central: +0.00
+          min:     +0.00
+          max:     +0.00
+          latex:    '$b_{+, 1}^{B\to \pi}$'
+          comments: ''
+      'B->pi::b_+^2@BCL2008-4' :
+          central: +0.00
+          min:     +0.00
+          max:     +0.00
+          latex:    '$b_{+, 2}^{B\to \pi}$'
+          comments: ''
+      'B->pi::b_+^3@BCL2008-4' :
+          central: +0.00
+          min:     +0.00
+          max:     +0.00
+          latex:    '$b_{+, 3}^{B\to \pi}$'
+          comments: ''
+      'B->pi::b_0^1@BCL2008-4' :
+          central: +0.00
+          min:     +0.00
+          max:     +0.00
+          latex:    '$b_{0, 1}^{B\to \pi}$'
+          comments: ''
+      'B->pi::b_0^2@BCL2008-4' :
+          central: +0.00
+          min:     +0.00
+          max:     +0.00
+          latex:    '$b_{0, 2}^{B\to \pi}$'
+          comments: ''
+      'B->pi::b_0^3@BCL2008-4' :
+          central: +0.00
+          min:     +0.00
+          max:     +0.00
+          latex:    '$b_{0, 3}^{B\to \pi}$'
+          comments: ''
+      'B->pi::f_T(0)@BCL2008-4' :
+          central: +0.00
+          min:     +0.00
+          max:     +0.00
+          latex:    '$f^{B\to \pi}_T(0)$'
+          comments: ''
+      'B->pi::b_T^1@BCL2008-4' :
+          central: +0.00
+          min:     +0.00
+          max:     +0.00
+          latex:    '$b_{T, 1}^{B\to \pi}$'
+          comments: ''
+      'B->pi::b_T^2@BCL2008-4' :
+          central: +0.00
+          min:     +0.00
+          max:     +0.00
+          latex:    '$b_{T, 2}^{B\to \pi}$'
+          comments: ''
+      'B->pi::b_T^3@BCL2008-4' :
+          central: +0.00
+          min:     +0.00
+          max:     +0.00
+          latex:    '$b_{T, 3}^{B\to \pi}$'
           comments: ''
       # form factor parameters for B->pi inspired by [BSZ2015]
       # new updated results based on a combined LQCD&LCSR fit from the GKvD2018 calculation
