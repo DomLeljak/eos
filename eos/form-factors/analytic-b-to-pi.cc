@@ -55,7 +55,7 @@ namespace eos
         UsedParameter M2;
         UsedParameter Mprime2;
         UsedParameter _s0_plus, _s0_plus_p, _s0_plus_pp;
-        UsedParameter           _s0_zero_p, _s0_zero_pp;
+        UsedParameter _s0_zero, _s0_zero_p, _s0_zero_pp;
         UsedParameter _s0_T,    _s0_T_p,    _s0_T_pp;
         UsedParameter sprime0B;
         UsedParameter mu;
@@ -83,6 +83,7 @@ namespace eos
             _s0_plus(p["B->pi::s_0^+(0)@DKMMO2008"], u),
             _s0_plus_p(p["B->pi::s_0^+'(0)@DKMMO2008"], u),
             _s0_plus_pp(p["B->pi::s_0^+''(0)@DKMMO2008"], u),
+            _s0_zero(p["B->pi::s_0^0(0)@DKMMO2008"], u),
             _s0_zero_p(p["B->pi::s_0^0'(0)@DKMMO2008"], u),
             _s0_zero_pp(p["B->pi::s_0^0''(0)@DKMMO2008"], u),
             _s0_T(p["B->pi::s_0^T(0)@DKMMO2008"], u),
@@ -129,7 +130,7 @@ namespace eos
 
         inline double s0tilB(const double & q2) const
         {
-            return _s0_plus() + _s0_zero_p() * q2 + _s0_zero_pp() * 0.5 * q2 * q2;
+            return _s0_zero() + _s0_zero_p() * q2 + _s0_zero_pp() * 0.5 * q2 * q2;
         }
 
         inline double s0TB(const double & q2) const
