@@ -79,12 +79,12 @@ class BCL2008FormFactorsTest :
         }
 } bcl2008_form_factors_test;
 
-class BCL2008_4_FormFactorsTest :
+class BCL2008K4FormFactorsTest :
     public TestCase
 {
     public:
-        BCL2008_4_FormFactorsTest() :
-            TestCase("bcl2008_4_form_factors_test")
+        BCL2008K4FormFactorsTest() :
+            TestCase("bcl2008_K4_form_factors_test")
         {
         }
 
@@ -97,13 +97,13 @@ class BCL2008_4_FormFactorsTest :
                 Parameters p = Parameters::Defaults();
                 std::shared_ptr<FormFactors<PToP>> ff = FormFactorFactory<PToP>::create("B->pi::BCL2008-4", p, Options{ });
 
-                p["B->pi::f_+(0)@BCL2008-4"] = 1.0;
-                p["B->pi::b_+^1@BCL2008-4"]  = 0.0;
-                p["B->pi::b_+^2@BCL2008-4"]  = 0.0;
-                p["B->pi::b_+^3@BCL2008-4"]  = 0.0;
-                p["B->pi::b_0^1@BCL2008-4"]  = 0.0;
-                p["B->pi::b_0^2@BCL2008-4"]  = 0.0;
-                p["B->pi::b_0^3@BCL2008-4"]  = 0.0;
+                p["B->pi::f_+(0)@BCL2008"] = 1.0;
+                p["B->pi::b_+^1@BCL2008"]  = 0.0;
+                p["B->pi::b_+^2@BCL2008"]  = 0.0;
+                p["B->pi::b_+^3@BCL2008"]  = 0.0;
+                p["B->pi::b_0^1@BCL2008"]  = 0.0;
+                p["B->pi::b_0^2@BCL2008"]  = 0.0;
+                p["B->pi::b_0^3@BCL2008"]  = 0.0;
 
                 TEST_CHECK_NEARLY_EQUAL(1.00000, ff->f_p( 0.0), eps);
                 TEST_CHECK_NEARLY_EQUAL(1.21408, ff->f_p( 5.0), eps);
@@ -116,12 +116,12 @@ class BCL2008_4_FormFactorsTest :
                 TEST_CHECK_NEARLY_EQUAL(1.95593, ff->f_0(15.0), eps);
                 TEST_CHECK_NEARLY_EQUAL(2.87063, ff->f_0(20.0), eps);
 
-                p["B->pi::b_+^1@BCL2008-4"]  = 1.0;
-                p["B->pi::b_+^2@BCL2008-4"]  = 0.0;
-                p["B->pi::b_+^3@BCL2008-4"]  = 0.0;
-                p["B->pi::b_0^1@BCL2008-4"]  = 1.0;
-                p["B->pi::b_0^2@BCL2008-4"]  = 0.0;
-                p["B->pi::b_0^3@BCL2008-4"]  = 0.0;
+                p["B->pi::b_+^1@BCL2008"]  = 1.0;
+                p["B->pi::b_+^2@BCL2008"]  = 0.0;
+                p["B->pi::b_+^3@BCL2008"]  = 0.0;
+                p["B->pi::b_0^1@BCL2008"]  = 1.0;
+                p["B->pi::b_0^2@BCL2008"]  = 0.0;
+                p["B->pi::b_0^3@BCL2008"]  = 0.0;
 
                 TEST_CHECK_NEARLY_EQUAL(1.00000, ff->f_p( 0.0), eps);
                 TEST_CHECK_NEARLY_EQUAL(1.16026, ff->f_p( 5.0), eps);
@@ -134,12 +134,12 @@ class BCL2008_4_FormFactorsTest :
                 TEST_CHECK_NEARLY_EQUAL(1.62004, ff->f_0(15.0), eps);
                 TEST_CHECK_NEARLY_EQUAL(2.07054, ff->f_0(20.0), eps);
 
-                p["B->pi::b_+^1@BCL2008-4"]  = 0.0;
-                p["B->pi::b_+^2@BCL2008-4"]  = 1.0;
-                p["B->pi::b_+^3@BCL2008-4"]  = 0.0;
-                p["B->pi::b_0^1@BCL2008-4"]  = 0.0;
-                p["B->pi::b_0^2@BCL2008-4"]  = 1.0;
-                p["B->pi::b_0^3@BCL2008-4"]  = 0.0;
+                p["B->pi::b_+^1@BCL2008"]  = 0.0;
+                p["B->pi::b_+^2@BCL2008"]  = 1.0;
+                p["B->pi::b_+^3@BCL2008"]  = 0.0;
+                p["B->pi::b_0^1@BCL2008"]  = 0.0;
+                p["B->pi::b_0^2@BCL2008"]  = 1.0;
+                p["B->pi::b_0^3@BCL2008"]  = 0.0;
 
                 TEST_CHECK_NEARLY_EQUAL(1.00000, ff->f_p( 0.0), eps);
                 TEST_CHECK_NEARLY_EQUAL(1.18833, ff->f_p( 5.0), eps);
@@ -152,12 +152,12 @@ class BCL2008_4_FormFactorsTest :
                 TEST_CHECK_NEARLY_EQUAL(1.82327, ff->f_0(15.0), eps);
                 TEST_CHECK_NEARLY_EQUAL(2.64024, ff->f_0(20.0), eps);
 
-                p["B->pi::b_+^1@BCL2008-4"]  = 0.0;
-                p["B->pi::b_+^2@BCL2008-4"]  = 0.0;
-                p["B->pi::b_+^3@BCL2008-4"]  = 1.0;
-                p["B->pi::b_0^1@BCL2008-4"]  = 0.0;
-                p["B->pi::b_0^2@BCL2008-4"]  = 0.0;
-                p["B->pi::b_0^3@BCL2008-4"]  = 1.0;
+                p["B->pi::b_+^1@BCL2008"]  = 0.0;
+                p["B->pi::b_+^2@BCL2008"]  = 0.0;
+                p["B->pi::b_+^3@BCL2008"]  = 1.0;
+                p["B->pi::b_0^1@BCL2008"]  = 0.0;
+                p["B->pi::b_0^2@BCL2008"]  = 0.0;
+                p["B->pi::b_0^3@BCL2008"]  = 1.0;
 
                 TEST_CHECK_NEARLY_EQUAL(1.00000, ff->f_p( 0.0), eps);
                 TEST_CHECK_NEARLY_EQUAL(1.20035, ff->f_p( 5.0), eps);
@@ -170,10 +170,10 @@ class BCL2008_4_FormFactorsTest :
                 TEST_CHECK_NEARLY_EQUAL(1.91416, ff->f_0(15.0), eps);
                 TEST_CHECK_NEARLY_EQUAL(2.80533, ff->f_0(20.0), eps);
 
-                p["B->pi::f_T(0)@BCL2008-4"] = 1.0;
-                p["B->pi::b_T^1@BCL2008-4"]  = 0.0;
-                p["B->pi::b_T^2@BCL2008-4"]  = 0.0;
-                p["B->pi::b_T^3@BCL2008-4"]  = 0.0;
+                p["B->pi::f_T(0)@BCL2008"] = 1.0;
+                p["B->pi::b_T^1@BCL2008"]  = 0.0;
+                p["B->pi::b_T^2@BCL2008"]  = 0.0;
+                p["B->pi::b_T^3@BCL2008"]  = 0.0;
 
                 TEST_CHECK_NEARLY_EQUAL(1.00000, ff->f_t( 0.0), eps);
                 TEST_CHECK_NEARLY_EQUAL(1.21408, ff->f_t( 5.0), eps);
@@ -181,9 +181,9 @@ class BCL2008_4_FormFactorsTest :
                 TEST_CHECK_NEARLY_EQUAL(2.12312, ff->f_t(15.0), eps);
                 TEST_CHECK_NEARLY_EQUAL(3.39360, ff->f_t(20.0), eps);
 
-                p["B->pi::b_T^1@BCL2008-4"]  = 1.0;
-                p["B->pi::b_T^2@BCL2008-4"]  = 0.0;
-                p["B->pi::b_T^3@BCL2008-4"]  = 0.0;
+                p["B->pi::b_T^1@BCL2008"]  = 1.0;
+                p["B->pi::b_T^2@BCL2008"]  = 0.0;
+                p["B->pi::b_T^3@BCL2008"]  = 0.0;
 
                 TEST_CHECK_NEARLY_EQUAL(1.00000, ff->f_t( 0.0), eps);
                 TEST_CHECK_NEARLY_EQUAL(1.16026, ff->f_t( 5.0), eps);
@@ -191,9 +191,9 @@ class BCL2008_4_FormFactorsTest :
                 TEST_CHECK_NEARLY_EQUAL(1.75519, ff->f_t(15.0), eps);
                 TEST_CHECK_NEARLY_EQUAL(2.44228, ff->f_t(20.0), eps);
 
-                p["B->pi::b_T^1@BCL2008-4"]  = 0.0;
-                p["B->pi::b_T^2@BCL2008-4"]  = 1.0;
-                p["B->pi::b_T^3@BCL2008-4"]  = 0.0;
+                p["B->pi::b_T^1@BCL2008"]  = 0.0;
+                p["B->pi::b_T^2@BCL2008"]  = 1.0;
+                p["B->pi::b_T^3@BCL2008"]  = 0.0;
 
                 TEST_CHECK_NEARLY_EQUAL(1.00000, ff->f_t( 0.0), eps);
                 TEST_CHECK_NEARLY_EQUAL(1.18833, ff->f_t( 5.0), eps);
@@ -201,9 +201,9 @@ class BCL2008_4_FormFactorsTest :
                 TEST_CHECK_NEARLY_EQUAL(1.98580, ff->f_t(15.0), eps);
                 TEST_CHECK_NEARLY_EQUAL(3.13217, ff->f_t(20.0), eps);
 
-                p["B->pi::b_T^1@BCL2008-4"]  = 0.0;
-                p["B->pi::b_T^2@BCL2008-4"]  = 0.0;
-                p["B->pi::b_T^3@BCL2008-4"]  = 1.0;
+                p["B->pi::b_T^1@BCL2008"]  = 0.0;
+                p["B->pi::b_T^2@BCL2008"]  = 0.0;
+                p["B->pi::b_T^3@BCL2008"]  = 1.0;
 
                 TEST_CHECK_NEARLY_EQUAL(1.00000, ff->f_t( 0.0), eps);
                 TEST_CHECK_NEARLY_EQUAL(1.20035, ff->f_t( 5.0), eps);
@@ -212,7 +212,7 @@ class BCL2008_4_FormFactorsTest :
                 TEST_CHECK_NEARLY_EQUAL(3.30001, ff->f_t(20.0), eps);
             }
         }
-} bcl2008_4_form_factors_test;
+} bcl2008_k4_form_factors_k4_test;
 
 class BSZ2015FormFactorsTest :
     public TestCase

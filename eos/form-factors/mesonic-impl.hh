@@ -56,8 +56,7 @@ namespace eos
     template <typename Process_, typename Transition_> class BFW2010FormFactors;
 
     /* Form Factors according to [BCL2008] */
-    template <typename Process_> class BCL2008FormFactors;
-    template <typename Process_> class BCL2008_4_FormFactors;
+    template <typename Process_, unsigned K_> class BCL2008FormFactors;
 
     /* Form Factors according to [BSZ2015] */
     template <typename Process_, typename Transition_> class BSZ2015FormFactors;
@@ -821,9 +820,9 @@ namespace eos
      * P -> P Form Factors in the simplified series expansion according to
      * [BCL2008].
      */
-    template <typename Process_, bool with_tensor_> class BCL2008FormFactorBase;
+    template <typename Process_, unsigned K_, bool with_tensor_> class BCL2008FormFactorBase;
 
-    template <typename Process_> class BCL2008FormFactorBase<Process_, false> :
+    template <typename Process_> class BCL2008FormFactorBase<Process_, 3u, false> :
         public FormFactors<typename Process_::Transition>
     {
         private:
@@ -886,57 +885,7 @@ namespace eos
             }
     };
 
-    template <typename Process_> class BCL2008FormFactorBase<Process_, true> :
-        public BCL2008FormFactorBase<Process_, false>
-    {
-        private:
-            /*
-             * Fit parametrisation for P -> P according to [BCL2008], eq. (11)
-             * with K = 3. Note that we factor out the form factor at q^2 = 0
-             * by setting t_0 = 0.0, thus b_k -> b_k / b_0. Note that the last
-             * coefficient b_K is fixed by eq. (14).
-             *
-             * Tensor form factors only. Vector and scalar form factor in BCL2008FormFactorBase<>.
-             */
-            UsedParameter _f_t_0,    _b_t_1,    _b_t_2;
-
-        public:
-            BCL2008FormFactorBase(const Parameters & p, const Options & o) :
-                BCL2008FormFactorBase<Process_, false>(p, o),
-                _f_t_0(p[std::string(Process_::label)    + "::f_T(0)@BCL2008"], *this),
-                _b_t_1(p[std::string(Process_::label)    + "::b_T^1@BCL2008"],  *this),
-                _b_t_2(p[std::string(Process_::label)    + "::b_T^2@BCL2008"],  *this)
-            {
-            }
-
-            virtual double f_t(const double & s) const
-            {
-                const double z = this->_z(s), z2 = z * z, z3 = z * z2;
-                const double z0 = this->_z(0), z02 = z0 * z0, z03 = z0 * z02;
-                const double zbar = z - z0, z2bar = z2 - z02, z3bar = z3 - z03;
-
-                return _f_t_0 / (1.0 - s / Process_::m2_Br1m) * (1.0 + _b_t_1 * (zbar - z3bar / 3.0) + _b_t_2 * (z2bar + 2.0 * z3bar / 3.0));
-            }
-    };
-
-    template <typename Process_> class BCL2008FormFactors :
-        public BCL2008FormFactorBase<Process_, Process_::uses_tensor_form_factors>
-    {
-        public:
-            BCL2008FormFactors(const Parameters & p, const Options & o) :
-                BCL2008FormFactorBase<Process_, Process_::uses_tensor_form_factors>(p, o)
-            {
-            }
-
-            static FormFactors<PToP> * make(const Parameters & parameters, const Options & options)
-            {
-                return new BCL2008FormFactors(parameters, options);
-            }
-    };
-
-    template <typename Process_, bool with_tensor_> class BCL2008_4_FormFactorBase;
-
-    template <typename Process_> class BCL2008_4_FormFactorBase<Process_, false> :
+    template <typename Process_> class BCL2008FormFactorBase<Process_, 4u, false> :
         public FormFactors<typename Process_::Transition>
     {
         private:
@@ -962,14 +911,14 @@ namespace eos
             }
 
         public:
-            BCL2008_4_FormFactorBase(const Parameters & p, const Options &) :
-                _f_plus_0(p[std::string(Process_::label) + "::f_+(0)@BCL2008-4"], *this),
-                _b_plus_1(p[std::string(Process_::label) + "::b_+^1@BCL2008-4"],  *this),
-                _b_plus_2(p[std::string(Process_::label) + "::b_+^2@BCL2008-4"],  *this),
-                _b_plus_3(p[std::string(Process_::label) + "::b_+^3@BCL2008-4"],  *this),
-                _b_zero_1(p[std::string(Process_::label) + "::b_0^1@BCL2008-4"],  *this),
-                _b_zero_2(p[std::string(Process_::label) + "::b_0^2@BCL2008-4"],  *this),
-                _b_zero_3(p[std::string(Process_::label) + "::b_0^3@BCL2008-4"],  *this)
+            BCL2008FormFactorBase(const Parameters & p, const Options &) :
+                _f_plus_0(p[std::string(Process_::label) + "::f_+(0)@BCL2008"], *this),
+                _b_plus_1(p[std::string(Process_::label) + "::b_+^1@BCL2008"],  *this),
+                _b_plus_2(p[std::string(Process_::label) + "::b_+^2@BCL2008"],  *this),
+                _b_plus_3(p[std::string(Process_::label) + "::b_+^3@BCL2008"],  *this),
+                _b_zero_1(p[std::string(Process_::label) + "::b_0^1@BCL2008"],  *this),
+                _b_zero_2(p[std::string(Process_::label) + "::b_0^2@BCL2008"],  *this),
+                _b_zero_3(p[std::string(Process_::label) + "::b_0^3@BCL2008"],  *this)
             {
             }
             virtual double f_p(const double & s) const
@@ -1001,8 +950,41 @@ namespace eos
             }
     };
 
-    template <typename Process_> class BCL2008_4_FormFactorBase<Process_, true> :
-        public BCL2008_4_FormFactorBase<Process_, false>
+    template <typename Process_> class BCL2008FormFactorBase<Process_, 3u, true> :
+        public BCL2008FormFactorBase<Process_, 3u, false>
+    {
+        private:
+            /*
+             * Fit parametrisation for P -> P according to [BCL2008], eq. (11)
+             * with K = 3. Note that we factor out the form factor at q^2 = 0
+             * by setting t_0 = 0.0, thus b_k -> b_k / b_0. Note that the last
+             * coefficient b_K is fixed by eq. (14).
+             *
+             * Tensor form factors only. Vector and scalar form factor in BCL2008FormFactorBase<>.
+             */
+            UsedParameter _f_t_0,    _b_t_1,    _b_t_2;
+
+        public:
+            BCL2008FormFactorBase(const Parameters & p, const Options & o) :
+                BCL2008FormFactorBase<Process_, 3u, false>(p, o),
+                _f_t_0(p[std::string(Process_::label)    + "::f_T(0)@BCL2008"], *this),
+                _b_t_1(p[std::string(Process_::label)    + "::b_T^1@BCL2008"],  *this),
+                _b_t_2(p[std::string(Process_::label)    + "::b_T^2@BCL2008"],  *this)
+            {
+            }
+
+            virtual double f_t(const double & s) const
+            {
+                const double z = this->_z(s), z2 = z * z, z3 = z * z2;
+                const double z0 = this->_z(0), z02 = z0 * z0, z03 = z0 * z02;
+                const double zbar = z - z0, z2bar = z2 - z02, z3bar = z3 - z03;
+
+                return _f_t_0 / (1.0 - s / Process_::m2_Br1m) * (1.0 + _b_t_1 * (zbar - z3bar / 3.0) + _b_t_2 * (z2bar + 2.0 * z3bar / 3.0));
+            }
+    };
+
+    template <typename Process_> class BCL2008FormFactorBase<Process_, 4u, true> :
+        public BCL2008FormFactorBase<Process_, 4u, false>
     {
         private:
             /*
@@ -1016,12 +998,12 @@ namespace eos
             UsedParameter _f_t_0,    _b_t_1,    _b_t_2,    _b_t_3;
 
         public:
-            BCL2008_4_FormFactorBase(const Parameters & p, const Options & o) :
-                BCL2008_4_FormFactorBase<Process_, false>(p, o),
-                _f_t_0(p[std::string(Process_::label)    + "::f_T(0)@BCL2008-4"], *this),
-                _b_t_1(p[std::string(Process_::label)    + "::b_T^1@BCL2008-4"],  *this),
-                _b_t_2(p[std::string(Process_::label)    + "::b_T^2@BCL2008-4"],  *this),
-                _b_t_3(p[std::string(Process_::label)    + "::b_T^3@BCL2008-4"],  *this)
+            BCL2008FormFactorBase(const Parameters & p, const Options & o) :
+                BCL2008FormFactorBase<Process_, 4u, false>(p, o),
+                _f_t_0(p[std::string(Process_::label)    + "::f_T(0)@BCL2008"], *this),
+                _b_t_1(p[std::string(Process_::label)    + "::b_T^1@BCL2008"],  *this),
+                _b_t_2(p[std::string(Process_::label)    + "::b_T^2@BCL2008"],  *this),
+                _b_t_3(p[std::string(Process_::label)    + "::b_T^3@BCL2008"],  *this)
 
             {
             }
@@ -1036,18 +1018,18 @@ namespace eos
             }
     };
 
-    template <typename Process_> class BCL2008_4_FormFactors :
-        public BCL2008_4_FormFactorBase<Process_, Process_::uses_tensor_form_factors>
+    template <typename Process_, unsigned K_> class BCL2008FormFactors :
+        public BCL2008FormFactorBase<Process_, K_, Process_::uses_tensor_form_factors>
     {
         public:
-            BCL2008_4_FormFactors(const Parameters & p, const Options & o) :
-                BCL2008_4_FormFactorBase<Process_, Process_::uses_tensor_form_factors>(p, o)
+            BCL2008FormFactors(const Parameters & p, const Options & o) :
+                BCL2008FormFactorBase<Process_, K_, Process_::uses_tensor_form_factors>(p, o)
             {
             }
 
             static FormFactors<PToP> * make(const Parameters & parameters, const Options & options)
             {
-                return new BCL2008_4_FormFactors(parameters, options);
+                return new BCL2008FormFactors(parameters, options);
             }
     };
 
