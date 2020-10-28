@@ -833,7 +833,7 @@ namespace eos
              * coefficient b_K is fixed by eq. (14).
              */
             UsedParameter _f_plus_0, _b_plus_1, _b_plus_2;
-            UsedParameter            _b_zero_1, _b_zero_2;
+            UsedParameter            _b_zero_1, _b_zero_2, _b_zero_3;
 
         protected:
             double _z(const double & s) const
@@ -853,7 +853,8 @@ namespace eos
                 _b_plus_1(p[std::string(Process_::label) + "::b_+^1@BCL2008"],  *this),
                 _b_plus_2(p[std::string(Process_::label) + "::b_+^2@BCL2008"],  *this),
                 _b_zero_1(p[std::string(Process_::label) + "::b_0^1@BCL2008"],  *this),
-                _b_zero_2(p[std::string(Process_::label) + "::b_0^2@BCL2008"],  *this)
+                _b_zero_2(p[std::string(Process_::label) + "::b_0^2@BCL2008"],  *this),
+                _b_zero_3(p[std::string(Process_::label) + "::b_0^3@BCL2008"],  *this)
             {
             }
             virtual double f_p(const double & s) const
@@ -867,14 +868,14 @@ namespace eos
 
             virtual double f_0(const double & s) const
             {
-                const double z = _z(s), z2 = z * z;
-                const double z0 = _z(0), z02 = z0 * z0;
-                const double zbar = z - z0, z2bar = z2 - z02;
+                const double z = _z(s), z2 = z * z, z3 = z * z2;
+                const double z0 = _z(0), z02 = z0 * z0, z03 = z0 * z02;
+                const double zbar = z - z0, z2bar = z2 - z02, z3bar = z3 - z03;
 
                 // note that f_0(0) = f_+(0)!
                 // for f_0(s) we do not have an equation of motion to express _b_zero_K in terms of the
                 // other coefficients!
-                return _f_plus_0 / (1.0 - s / Process_::m2_Br0p) * (1.0 + _b_zero_1 * zbar + _b_zero_2 * z2bar);
+                return _f_plus_0 / (1.0 - s / Process_::m2_Br0p) * (1.0 + _b_zero_1 * zbar + _b_zero_2 * z2bar + _b_zero_3 * z3bar);
             }
 
             virtual double f_t(const double &) const
@@ -896,7 +897,7 @@ namespace eos
              * coefficient b_K is fixed by eq. (14).
              */
             UsedParameter _f_plus_0, _b_plus_1, _b_plus_2, _b_plus_3;
-            UsedParameter            _b_zero_1, _b_zero_2, _b_zero_3;
+            UsedParameter            _b_zero_1, _b_zero_2, _b_zero_3, _b_zero_4;
 
         protected:
             double _z(const double & s) const
@@ -918,7 +919,8 @@ namespace eos
                 _b_plus_3(p[std::string(Process_::label) + "::b_+^3@BCL2008"],  *this),
                 _b_zero_1(p[std::string(Process_::label) + "::b_0^1@BCL2008"],  *this),
                 _b_zero_2(p[std::string(Process_::label) + "::b_0^2@BCL2008"],  *this),
-                _b_zero_3(p[std::string(Process_::label) + "::b_0^3@BCL2008"],  *this)
+                _b_zero_3(p[std::string(Process_::label) + "::b_0^3@BCL2008"],  *this),
+                _b_zero_4(p[std::string(Process_::label) + "::b_0^4@BCL2008"],  *this)
             {
             }
             virtual double f_p(const double & s) const
@@ -932,14 +934,14 @@ namespace eos
 
             virtual double f_0(const double & s) const
             {
-                const double z = _z(s), z2 = z * z, z3 = z * z2;
-                const double z0 = _z(0), z02 = z0 * z0, z03 = z0 * z02;
-                const double zbar = z - z0, z2bar = z2 - z02, z3bar = z3 - z03;
+                const double z = _z(s), z2 = z * z, z3 = z * z2, z4 = z * z3;
+                const double z0 = _z(0), z02 = z0 * z0, z03 = z0 * z02, z04 = z0 * z03;
+                const double zbar = z - z0, z2bar = z2 - z02, z3bar = z3 - z03, z4bar = z4 - z04;
 
                 // note that f_0(0) = f_+(0)!
                 // for f_0(s) we do not have an equation of motion to express _b_zero_K in terms of the
                 // other coefficients!
-                return _f_plus_0 / (1.0 - s / Process_::m2_Br0p) * (1.0 + _b_zero_1 * zbar + _b_zero_2 * z2bar + _b_zero_3 * z3bar);
+                return _f_plus_0 / (1.0 - s / Process_::m2_Br0p) * (1.0 + _b_zero_1 * zbar + _b_zero_2 * z2bar + _b_zero_3 * z3bar + _b_zero_4 * z4bar);
             }
 
             virtual double f_t(const double &) const
