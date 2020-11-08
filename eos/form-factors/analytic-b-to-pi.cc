@@ -1109,8 +1109,6 @@ namespace eos
             // analytically continued. See also comment at beginning of Appendix B
             // of [DKMMO2008], p. 21.
 
-            return 0.0;
-
             static const double pi2 = M_PI * M_PI;
 
             const double mb = this->m_b_msbar(mu), mb2 = mb * mb;
